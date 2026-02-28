@@ -1,0 +1,1966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillBridge AI — Implementation Plan & PRD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:          #F7F5F0;
+  --surface:     #FFFFFF;
+  --surface-2:   #F2EFE9;
+  --border:      #E4DFD7;
+  --border-soft: #EDE9E3;
+
+  --ink:    #1A1915;
+  --ink-70: #4A4840;
+  --ink-40: #8C897F;
+  --ink-20: #C4C1BA;
+
+  --green:       #2D7A5A;
+  --green-light: #E8F5EF;
+  --green-mid:   #A8D5BE;
+
+  --blue:        #2E5FA3;
+  --blue-light:  #EBF0FA;
+  --blue-mid:    #A8BDE8;
+
+  --amber:       #B86E00;
+  --amber-light: #FDF3E3;
+  --amber-mid:   #F0C87A;
+
+  --rose:        #B04060;
+  --rose-light:  #FAE8EE;
+  --rose-mid:    #E8A0B5;
+
+  --violet:      #5B3FA0;
+  --violet-light:#F0ECFA;
+
+  --r-sm: 6px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-2xl:36px;
+
+  --shadow-xs: 0 1px 3px rgba(26,25,21,0.07);
+  --shadow-sm: 0 2px 8px rgba(26,25,21,0.08);
+  --shadow-md: 0 6px 24px rgba(26,25,21,0.09);
+  --shadow-lg: 0 16px 48px rgba(26,25,21,0.11);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── SIDEBAR NAV ─── */
+.sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 32px 0;
+  overflow-y: auto;
+  z-index: 100;
+}
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 20px 28px;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 20px;
+}
+.logo-mark {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--green) 0%, var(--blue) 100%);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+}
+.logo-text { font-size: 14px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.logo-sub  { font-size: 10px; color: var(--ink-40); font-weight: 400; }
+
+.nav-group { margin-bottom: 4px; }
+.nav-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ink-20); padding: 8px 20px 4px;
+}
+.nav-link {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 20px;
+  font-size: 13px; font-weight: 500; color: var(--ink-70);
+  text-decoration: none;
+  border-radius: 0;
+  transition: all 0.15s;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+}
+.nav-link:hover { background: var(--surface-2); color: var(--ink); border-left-color: var(--border); }
+.nav-link.active { background: var(--green-light); color: var(--green); border-left-color: var(--green); font-weight: 600; }
+.nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+/* ─── MAIN ─── */
+.main {
+  margin-left: 240px;
+  padding: 48px 56px 100px;
+  max-width: calc(1200px + 240px);
+}
+
+/* ─── HERO ─── */
+.hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-2xl);
+  padding: 56px 60px;
+  margin-bottom: 56px;
+  position: relative; overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp 0.6s ease both;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -80px; right: -80px;
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(45,122,90,0.08) 0%, transparent 65%);
+  border-radius: 50%;
+}
+.hero::after {
+  content: '';
+  position: absolute; bottom: -50px; left: 30%;
+  width: 280px; height: 280px;
+  background: radial-gradient(circle, rgba(46,95,163,0.07) 0%, transparent 65%);
+  border-radius: 50%;
+}
+.track-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--amber-light); color: var(--amber);
+  border: 1px solid var(--amber-mid);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: clamp(34px, 4.5vw, 58px);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  max-width: 720px;
+  margin-bottom: 18px;
+}
+.hero h1 em { font-style: italic; color: var(--green); }
+.hero-desc { font-size: 16px; color: var(--ink-70); max-width: 640px; line-height: 1.75; margin-bottom: 40px; }
+.hero-meta {
+  display: flex; flex-wrap: wrap; gap: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+}
+.meta-item {
+  padding: 0 32px 0 0;
+  border-right: 1px solid var(--border-soft);
+  margin-right: 32px;
+}
+.meta-item:last-child { border-right: none; }
+.meta-key { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-20); margin-bottom: 4px; }
+.meta-val { font-size: 14px; font-weight: 600; color: var(--ink); }
+
+/* ─── SECTION ─── */
+section { margin-bottom: 64px; animation: fadeUp 0.5s ease both; }
+.section-head {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 28px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.sec-num {
+  width: 28px; height: 28px; border-radius: var(--r-sm);
+  background: var(--surface-2); border: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 500;
+  color: var(--ink-40);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-head h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px; font-weight: 400;
+  color: var(--ink); line-height: 1.25;
+}
+.section-head p { font-size: 13px; color: var(--ink-40); margin-top: 2px; }
+
+/* ─── PROSE ─── */
+p { font-size: 14.5px; color: var(--ink-70); line-height: 1.8; margin-bottom: 12px; }
+p:last-child { margin-bottom: 0; }
+strong { color: var(--ink); font-weight: 600; }
+
+/* ─── GRIDS ─── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+/* ─── CARDS ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px 26px;
+  box-shadow: var(--shadow-xs);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.card-h { font-family: 'Instrument Serif', serif; font-size: 17px; color: var(--ink); margin-bottom: 8px; }
+.card-p { font-size: 13px; color: var(--ink-70); line-height: 1.7; }
+
+/* ─── STAT CARD ─── */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  text-align: center;
+  box-shadow: var(--shadow-xs);
+}
+.stat-num { font-family: 'Instrument Serif', serif; font-size: 40px; line-height: 1; margin-bottom: 6px; }
+.stat-lbl { font-size: 12px; color: var(--ink-40); font-weight: 500; letter-spacing: 0.04em; }
+
+/* ─── FEATURE CARDS ─── */
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 26px;
+  box-shadow: var(--shadow-xs);
+  transition: all 0.2s;
+}
+.feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+.fi {
+  width: 42px; height: 42px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px; margin-bottom: 14px;
+}
+.feature-card h3 { font-family: 'Instrument Serif', serif; font-size: 17px; color: var(--ink); margin-bottom: 7px; }
+.feature-card p  { font-size: 13px; color: var(--ink-70); margin: 0; line-height: 1.65; }
+.f-tag {
+  display: inline-block;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 4px; margin-bottom: 10px;
+}
+
+/* ─── TECH STACK PILLS ─── */
+.stack-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.stack-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 500; color: var(--ink-70);
+  transition: all 0.15s;
+}
+.stack-pill:hover { background: var(--surface); border-color: var(--ink-20); color: var(--ink); }
+.stack-pill .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+/* ─── SPRINT TABLE ─── */
+.sprint-table { width: 100%; border-collapse: collapse; }
+.sprint-table th {
+  text-align: left;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-40);
+  padding: 10px 16px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+.sprint-table th:first-child { border-radius: var(--r-sm) 0 0 0; }
+.sprint-table th:last-child  { border-radius: 0 var(--r-sm) 0 0; }
+.sprint-table td {
+  padding: 14px 16px;
+  font-size: 13px; color: var(--ink-70);
+  border-bottom: 1px solid var(--border-soft);
+  vertical-align: top;
+}
+.sprint-table tr:last-child td { border-bottom: none; }
+.sprint-table tr:hover td { background: var(--surface-2); }
+.sprint-num {
+  display: inline-flex; align-items: center;
+  background: var(--green-light); color: var(--green);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: 4px;
+}
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ─── API BLOCK ─── */
+.api-card {
+  background: #1A1915;
+  border: 1px solid #2E2C27;
+  border-radius: var(--r-lg);
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 16px;
+}
+.api-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #2E2C27;
+  background: #141410;
+}
+.api-method {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  padding: 3px 10px; border-radius: 4px;
+}
+.get  { background: rgba(45,122,90,0.25); color: #6BC99A; }
+.post { background: rgba(46,95,163,0.25); color: #8AB3E8; }
+.api-path { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #D4CFCA; }
+.api-desc  { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #6B6860; margin-left: auto; }
+.api-body  { padding: 16px 20px; }
+.api-body pre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: #A8C8A8;
+  line-height: 1.7; white-space: pre-wrap;
+}
+.json-key    { color: #79B8FF; }
+.json-str    { color: #A8C8A8; }
+.json-num    { color: #F0C892; }
+.json-bool   { color: #FF8B7E; }
+
+/* ─── ARCHITECTURE DIAGRAM ─── */
+.arch-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 40px;
+  box-shadow: var(--shadow-sm);
+}
+.arch-layer {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 12px;
+}
+.arch-label {
+  width: 120px; flex-shrink: 0;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-40); text-align: right;
+}
+.arch-boxes { display: flex; gap: 8px; flex: 1; }
+.arch-box {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  font-size: 12px; font-weight: 600; text-align: center;
+  transition: transform 0.15s;
+}
+.arch-box:hover { transform: scale(1.02); }
+.arch-arrow {
+  text-align: center; color: var(--ink-20);
+  font-size: 18px; margin: 4px 0;
+  padding-left: 132px;
+}
+.arch-divider {
+  margin: 20px 0;
+  border: 0; border-top: 1px dashed var(--border);
+}
+
+/* ─── MILESTONE TRACK ─── */
+.milestone-row { display: flex; gap: 0; position: relative; }
+.milestone-row::before {
+  content: '';
+  position: absolute; top: 18px; left: 0; right: 0;
+  height: 2px; background: var(--border);
+  z-index: 0;
+}
+.milestone {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: 10px; position: relative; z-index: 1;
+}
+.ms-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: all 0.2s;
+}
+.ms-dot:hover { transform: scale(1.15); }
+.ms-active .ms-dot { background: var(--green); border-color: var(--green); color: white; }
+.ms-label { font-size: 11px; font-weight: 600; color: var(--ink-70); text-align: center; line-height: 1.4; }
+.ms-week  { font-size: 10px; color: var(--ink-40); font-family: 'JetBrains Mono', monospace; }
+
+/* ─── PROMPT BLOCK ─── */
+.prompt-block {
+  background: #FDFCF8;
+  border: 1.5px solid var(--amber-mid);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.prompt-header {
+  background: var(--amber-light);
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--amber-mid);
+  display: flex; align-items: center; gap: 10px;
+}
+.prompt-header-title {
+  font-family: 'Instrument Serif', serif; font-size: 18px; color: var(--amber);
+}
+.prompt-header-badge {
+  margin-left: auto;
+  background: var(--amber); color: white;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 12px;
+}
+.prompt-body { padding: 28px; }
+.prompt-section { margin-bottom: 24px; }
+.prompt-section:last-child { margin-bottom: 0; }
+.prompt-section-title {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.prompt-section-title::after { content: ''; flex: 1; height: 1px; background: var(--amber-mid); }
+.prompt-text {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px; color: var(--ink-70);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+/* ─── CALLOUT ─── */
+.callout {
+  display: flex; gap: 14px;
+  padding: 18px 22px;
+  border-radius: var(--r-md);
+  border-left: 3px solid;
+  margin: 20px 0;
+}
+.callout-icon { font-size: 18px; flex-shrink: 0; }
+.callout p { margin: 0; font-size: 13.5px; line-height: 1.65; }
+.callout-green  { background: var(--green-light);  border-color: var(--green);  }
+.callout-blue   { background: var(--blue-light);   border-color: var(--blue);   }
+.callout-amber  { background: var(--amber-light);  border-color: var(--amber);  }
+
+/* ─── DB SCHEMA ─── */
+.schema-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 12.5px; font-family: 'JetBrains Mono', monospace;
+}
+.schema-table th {
+  background: var(--surface-2);
+  text-align: left; padding: 9px 14px;
+  font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--ink-40); font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.schema-table td { padding: 9px 14px; border-bottom: 1px solid var(--border-soft); color: var(--ink-70); }
+.schema-table tr:last-child td { border-bottom: none; }
+.schema-table tr:hover td { background: var(--surface-2); }
+.type-tag {
+  display: inline-block;
+  background: var(--indigo-light, var(--blue-light));
+  color: var(--blue);
+  font-size: 10px; padding: 1px 7px; border-radius: 4px;
+}
+.pk { color: var(--amber); font-weight: 700; }
+.fk { color: var(--blue); }
+
+/* ─── SUCCESS METRIC ─── */
+.metric-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.15s;
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-row:hover { background: var(--surface-2); }
+.metric-icon { font-size: 20px; width: 32px; text-align: center; }
+.metric-info { flex: 1; }
+.metric-name { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+.metric-desc { font-size: 12px; color: var(--ink-40); }
+.metric-target {
+  font-family: 'Instrument Serif', serif; font-size: 22px; color: var(--green);
+}
+
+/* ─── RISK TABLE ─── */
+.risk-item {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 16px; align-items: start;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 13px;
+}
+.risk-item:hover { background: var(--surface-2); }
+.risk-item:last-child { border-bottom: none; }
+.risk-header {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 2fr;
+  gap: 16px; padding: 10px 20px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-40);
+}
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-high   { background: var(--rose-light);   color: var(--rose);   }
+.badge-med    { background: var(--amber-light);  color: var(--amber);  }
+.badge-low    { background: var(--green-light);  color: var(--green);  }
+.badge-blue   { background: var(--blue-light);   color: var(--blue);   }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+section:nth-child(2)  { animation-delay: 0.04s; }
+section:nth-child(3)  { animation-delay: 0.08s; }
+section:nth-child(4)  { animation-delay: 0.12s; }
+section:nth-child(5)  { animation-delay: 0.16s; }
+section:nth-child(6)  { animation-delay: 0.20s; }
+section:nth-child(7)  { animation-delay: 0.24s; }
+section:nth-child(8)  { animation-delay: 0.28s; }
+section:nth-child(9)  { animation-delay: 0.32s; }
+section:nth-child(10) { animation-delay: 0.36s; }
+section:nth-child(11) { animation-delay: 0.40s; }
+section:nth-child(12) { animation-delay: 0.44s; }
+section:nth-child(13) { animation-delay: 0.48s; }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink-20); border-radius: 4px; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 32px 20px; }
+  .g3, .g4 { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 36px 28px; }
+}
+@media (max-width: 600px) {
+  .g2, .g3, .g4 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── SIDEBAR ── -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">SB</div>
+    <div>
+      <div class="logo-text">SkillBridge AI</div>
+      <div class="logo-sub">Implementation Plan v1.0</div>
+    </div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Overview</div>
+    <a class="nav-link active" href="#overview"><span class="nav-icon">◉</span>Problem & Vision</a>
+    <a class="nav-link" href="#market"><span class="nav-icon">◎</span>Market Context</a>
+    <a class="nav-link" href="#personas"><span class="nav-icon">◎</span>User Personas</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Product</div>
+    <a class="nav-link" href="#features"><span class="nav-icon">◎</span>Core Features</a>
+    <a class="nav-link" href="#bonus"><span class="nav-icon">◎</span>Bonus Features</a>
+    <a class="nav-link" href="#ux"><span class="nav-icon">◎</span>UX Flows</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Engineering</div>
+    <a class="nav-link" href="#architecture"><span class="nav-icon">◎</span>Architecture</a>
+    <a class="nav-link" href="#techstack"><span class="nav-icon">◎</span>Tech Stack</a>
+    <a class="nav-link" href="#apis"><span class="nav-icon">◎</span>API Design</a>
+    <a class="nav-link" href="#database"><span class="nav-icon">◎</span>Database Schema</a>
+    <a class="nav-link" href="#ai"><span class="nav-icon">◎</span>AI/ML Pipeline</a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-label">Delivery</div>
+    <a class="nav-link" href="#sprints"><span class="nav-icon">◎</span>Sprint Plan</a>
+    <a class="nav-link" href="#metrics"><span class="nav-icon">◎</span>Success Metrics</a>
+    <a class="nav-link" href="#risks"><span class="nav-icon">◎</span>Risk Register</a>
+    <a class="nav-link" href="#prompt"><span class="nav-icon">◎</span>Master Prompt</a>
+  </div>
+</nav>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero" id="overview">
+    <div class="track-badge">🎓 EdTech · Track 3</div>
+    <h1>Skill-Gap-to-<em>Job Market</em><br>Prediction Engine</h1>
+    <p class="hero-desc">
+      A full-stack AI platform that ingests real-time job market signals, cross-references them against a learner's
+      existing skill profile, and generates hyper-personalized upskilling roadmaps — closing the employability gap
+      before it ever becomes a career obstacle.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item">
+        <div class="meta-key">Product Name</div>
+        <div class="meta-val">SkillBridge AI</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Version</div>
+        <div class="meta-val">1.0 MVP</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Timeline</div>
+        <div class="meta-val">12 Weeks</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Team Size</div>
+        <div class="meta-val">4–6 Engineers</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-key">Status</div>
+        <div class="meta-val" style="color:var(--green);">● Active Development</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. MARKET CONTEXT -->
+  <section id="market">
+    <div class="section-head">
+      <div class="sec-num">01</div>
+      <div>
+        <h2>Market Context & Problem Statement</h2>
+        <p>Why this matters right now</p>
+      </div>
+    </div>
+
+    <p>The global talent market is experiencing its most severe skills mismatch in modern history. Students graduate with academic credentials that no longer map to what employers actually need — and by the time they realize the gap, years have already been lost to outdated curricula and misaligned effort.</p>
+
+    <div class="g4" style="margin: 24px 0;">
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--rose);">87%</div>
+        <div class="stat-lbl">Employers report skills shortage in candidates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--amber);">$8.5T</div>
+        <div class="stat-lbl">Global revenue at risk from talent shortage by 2030</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--green);">69%</div>
+        <div class="stat-lbl">Students say courses don't reflect job market realities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="color:var(--blue);">2.3×</div>
+        <div class="stat-lbl">Higher hire rate for skill-verified vs credential-only applicants</div>
+      </div>
+    </div>
+
+    <p><strong>The core problem</strong> is a three-way disconnect: educators teach static syllabi, employers demand evolving skills, and students navigate this gap without data-driven guidance. SkillBridge AI acts as the intelligent bridge — a real-time intelligence layer that makes the invisible visible.</p>
+
+    <div class="callout callout-green">
+      <span class="callout-icon">💡</span>
+      <p><strong>Opportunity:</strong> No existing platform combines real-time job-market scraping, personalized skill-gap analysis, and AI-generated adaptive learning roadmaps in a single cohesive experience. SkillBridge occupies this white space entirely.</p>
+    </div>
+  </section>
+
+  <!-- 2. PERSONAS -->
+  <section id="personas">
+    <div class="section-head">
+      <div class="sec-num">02</div>
+      <div>
+        <h2>User Personas</h2>
+        <p>Who we're building for</p>
+      </div>
+    </div>
+
+    <div class="g3">
+      <!-- Persona 1 -->
+      <div class="card" style="border-top: 3px solid var(--green);">
+        <div class="persona-avatar" style="background:var(--green-light);">👩‍💻</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:2px;">Priya, 21</div>
+        <div style="font-size:11px;color:var(--ink-40);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;">Final-Year CS Student</div>
+        <div class="card-p" style="margin-bottom:12px;"><strong>Goal:</strong> Land a data science role at a product company within 6 months of graduation.</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Doesn't know which skills are most in-demand right now</div>
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Overwhelmed by conflicting "learn this" advice online</div>
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Uncertain how to prioritize learning with limited time</div>
+          <div style="font-size:12px;color:var(--green);display:flex;gap:8px;"><span>✓</span> Motivated, self-directed, willing to invest 8–10 hrs/week</div>
+        </div>
+      </div>
+
+      <!-- Persona 2 -->
+      <div class="card" style="border-top: 3px solid var(--blue);">
+        <div class="persona-avatar" style="background:var(--blue-light);">👨‍🏫</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:2px;">Rohan, 34</div>
+        <div style="font-size:11px;color:var(--ink-40);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;">Career Switcher / Working Professional</div>
+        <div class="card-p" style="margin-bottom:12px;"><strong>Goal:</strong> Transition from a marketing role into product management at a tech startup.</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Unclear which existing skills transfer to new domain</div>
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Limited time — only 5 hrs/week to upskill</div>
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Doesn't know which PM skills to focus on for 2025 roles</div>
+          <div style="font-size:12px;color:var(--green);display:flex;gap:8px;"><span>✓</span> High intent, budget for paid courses, needs clarity</div>
+        </div>
+      </div>
+
+      <!-- Persona 3 -->
+      <div class="card" style="border-top: 3px solid var(--amber);">
+        <div class="persona-avatar" style="background:var(--amber-light);">🏫</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;margin-bottom:2px;">Dr. Meena, 47</div>
+        <div style="font-size:11px;color:var(--ink-40);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px;">College Training & Placement Officer</div>
+        <div class="card-p" style="margin-bottom:12px;"><strong>Goal:</strong> Improve campus placement rates by identifying batch-level skill gaps early.</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;">
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> No data-driven view of student-employer skill gap</div>
+          <div style="font-size:12px;color:var(--ink-70);display:flex;gap:8px;"><span style="color:var(--rose);">✗</span> Curriculum update cycles too slow (annual)</div>
+          <div style="font-size:12px;color:var(--rose);">✗</span><span style="font-size:12px;color:var(--ink-70);"> Can't benchmark against real-time industry trends</span></div>
+          <div style="font-size:12px;color:var(--green);display:flex;gap:8px;"><span>✓</span> Decision-maker with budget and institutional authority</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. CORE FEATURES -->
+  <section id="features">
+    <div class="section-head">
+      <div class="sec-num">03</div>
+      <div>
+        <h2>Core Feature Set</h2>
+        <p>8 primary modules that define the MVP</p>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-bottom:16px;">
+      <div class="feature-card">
+        <div class="fi" style="background:var(--green-light);">🧠</div>
+        <div class="f-tag" style="background:var(--green-light);color:var(--green);">Module 01</div>
+        <h3>AI Skill Profile Builder</h3>
+        <p>Multi-modal skill ingestion: structured questionnaire, resume parser (NLP), GitHub repo analyzer, LinkedIn OAuth import, and LeetCode/Hackerrank API sync. Outputs a normalized, weighted skill vector across 200+ skill nodes.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--blue-light);">🔭</div>
+        <div class="f-tag" style="background:var(--blue-light);color:var(--blue);">Module 02</div>
+        <h3>Real-Time Job Market Intelligence</h3>
+        <p>Continuous scraping and NLP extraction from LinkedIn Jobs, Indeed, Naukri, AngelList, Glassdoor. Skill demand tracked with weekly velocity — identifying trending, declining, and emerging skills per role, sector, and geography.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--rose-light);">📊</div>
+        <div class="f-tag" style="background:var(--rose-light);color:var(--rose);">Module 03</div>
+        <h3>Dynamic Skill-Gap Analyzer</h3>
+        <p>Compares student skill vector against target role skill requirements. Outputs a ranked gap report with criticality scores (high/medium/low), current market demand index, and time-to-close estimates per skill.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--amber-light);">🗺️</div>
+        <div class="f-tag" style="background:var(--amber-light);color:var(--amber);">Module 04</div>
+        <h3>Personalized Learning Roadmap Engine</h3>
+        <p>GPT-4o powered roadmap generation. Sequences learning milestones based on prerequisite graphs, available weekly hours, target timeline, and learning style preferences. Integrates free + paid resources (Coursera, Udemy, YouTube, docs).</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--violet-light);">🔮</div>
+        <div class="f-tag" style="background:var(--violet-light);color:var(--violet);">Module 05</div>
+        <h3>Future Skills Forecasting</h3>
+        <p>Predictive ML model (XGBoost + time-series LSTM) forecasts which skills will be in high demand in 6, 12, and 24 months. Learners can opt-in to "future-proof" roadmaps that include emerging skills before they peak.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--green-light);">📈</div>
+        <div class="f-tag" style="background:var(--green-light);color:var(--green);">Module 06</div>
+        <h3>Employability Score Dashboard</h3>
+        <p>A live, composite "Employability Score" (0–1000) that updates as learners complete modules. Broken down by role fitment %, market demand alignment, project portfolio strength, and soft skills index. Motivational and gamified.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--blue-light);">🤖</div>
+        <div class="f-tag" style="background:var(--blue-light);color:var(--blue);">Module 07</div>
+        <h3>AI Career Coach Chatbot</h3>
+        <p>Conversational AI (Claude Sonnet via Anthropic API) acting as a career advisor. Answers questions about roadmap, explains why specific skills matter, helps update goals, reviews project descriptions, and gives resume feedback on demand.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="fi" style="background:var(--amber-light);">🏛️</div>
+        <div class="f-tag" style="background:var(--amber-light);color:var(--amber);">Module 08</div>
+        <h3>Institution Analytics Dashboard</h3>
+        <p>Admin portal for T&P officers and educators. Batch-level skill gap heatmaps, cohort-vs-industry benchmark reports, curriculum recommendation engine, student progress tracking, and placement probability forecasts per company.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. BONUS FEATURES -->
+  <section id="bonus">
+    <div class="section-head">
+      <div class="sec-num">04</div>
+      <div>
+        <h2>Bonus & Differentiator Features</h2>
+        <p>Beyond the brief — what makes SkillBridge unforgettable</p>
+      </div>
+    </div>
+
+    <div class="g3">
+      <div class="card">
+        <div class="fi" style="background:var(--green-light);margin-bottom:10px;width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:10px;">🎯</div>
+        <div class="card-h">Job Match Simulator</div>
+        <div class="card-p">Paste any job description → AI instantly scores the user's current profile against it, highlights gaps, and generates a micro-roadmap to close that specific role's requirements within a user-defined timeline.</div>
+      </div>
+      <div class="card">
+        <div class="fi" style="background:var(--blue-light);margin-bottom:10px;width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:10px;">🏆</div>
+        <div class="card-h">Skill Challenge Arena</div>
+        <div class="card-p">Weekly AI-generated coding/case challenges tailored to the user's target role. Performance updates the skill profile automatically. Leaderboard for peer comparison. Badges for milestone achievements.</div>
+      </div>
+      <div class="card">
+        <div class="fi" style="background:var(--rose-light);margin-bottom:10px;width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:10px;">🌐</div>
+        <div class="card-h">Peer Cohort Benchmarking</div>
+        <div class="card-p">Anonymous comparison of your skill profile against peers targeting the same role. See the 25th, 50th, 75th percentile for each skill. Understand exactly where you stand without exposure of personal data.</div>
+      </div>
+      <div class="card">
+        <div class="fi" style="background:var(--amber-light);margin-bottom:10px;width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:10px;">🔔</div>
+        <div class="card-h">Smart Skill Alert System</div>
+        <div class="card-p">Personalized alerts when a skill in your roadmap suddenly surges in demand, a new technology disrupts your target domain, or a top employer in your target sector starts hiring aggressively for specific skills.</div>
+      </div>
+      <div class="card">
+        <div class="fi" style="background:var(--violet-light);margin-bottom:10px;width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:10px;">📄</div>
+        <div class="card-h">AI Resume Optimizer</div>
+        <div class="card-p">Upload resume → AI rewrites bullet points to highlight skills that are trending for the target role, adds ATS keywords, scores against specific JDs, and exports optimized resume as PDF ready for submission.</div>
+      </div>
+      <div class="card">
+        <div class="fi" style="background:var(--green-light);margin-bottom:10px;width:36px;height:36px;font-size:16px;display:flex;align-items:center;justify-content:center;border-radius:10px;">💼</div>
+        <div class="card-h">Salary Intelligence Layer</div>
+        <div class="card-p">Each skill in the roadmap is annotated with its salary premium — quantifying the ROI of learning it. Shows average salary delta for mastering a skill at the target company tier and location, sourced from Glassdoor & Levels.fyi.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. UX FLOWS -->
+  <section id="ux">
+    <div class="section-head">
+      <div class="sec-num">05</div>
+      <div>
+        <h2>Core User Flows</h2>
+        <p>Step-by-step journey through the platform</p>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-h" style="margin-bottom:16px;">🔀 Flow 1: Student Onboarding & Gap Analysis</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+            <div><strong style="font-size:13px;">Sign Up & Goal Setting</strong><div style="font-size:12px;color:var(--ink-40);">Select target role + sector + timeline + weekly hours available</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+            <div><strong style="font-size:13px;">Skill Profile Ingestion</strong><div style="font-size:12px;color:var(--ink-40);">Upload resume + connect GitHub + answer adaptive questionnaire</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+            <div><strong style="font-size:13px;">Gap Analysis Report</strong><div style="font-size:12px;color:var(--ink-40);">View ranked skill gaps with market demand, criticality, and time estimates</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+            <div><strong style="font-size:13px;">Roadmap Generation</strong><div style="font-size:12px;color:var(--ink-40);">AI builds a week-by-week personalized learning path with curated resources</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+            <div><strong style="font-size:13px;">Track Progress & Iterate</strong><div style="font-size:12px;color:var(--ink-40);">Mark completions, take skill challenges, watch employability score rise</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h" style="margin-bottom:16px;">🏛️ Flow 2: Institution Admin Analytics</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+            <div><strong style="font-size:13px;">Institution Setup</strong><div style="font-size:12px;color:var(--ink-40);">Add college/organization, configure departments, invite students via bulk CSV</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+            <div><strong style="font-size:13px;">Batch Skill Heatmap</strong><div style="font-size:12px;color:var(--ink-40);">Visual skill coverage across the cohort — see which skills are uniformly absent</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+            <div><strong style="font-size:13px;">Industry Benchmark</strong><div style="font-size:12px;color:var(--ink-40);">Compare batch skill profile vs top 50 hiring companies in target sectors</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+            <div><strong style="font-size:13px;">Curriculum Recommendation</strong><div style="font-size:12px;color:var(--ink-40);">AI suggests electives + workshops to plug systemic skill gaps across the batch</div></div>
+          </div>
+          <div style="display:flex;gap:14px;padding:10px 0;">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</div>
+            <div><strong style="font-size:13px;">Placement Forecast Report</strong><div style="font-size:12px;color:var(--ink-40);">Per-student placement probability at named companies; exportable as PDF report</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. ARCHITECTURE -->
+  <section id="architecture">
+    <div class="section-head">
+      <div class="sec-num">06</div>
+      <div>
+        <h2>System Architecture</h2>
+        <p>High-level distributed system design</p>
+      </div>
+    </div>
+
+    <div class="arch-diagram">
+      <div style="text-align:center;margin-bottom:32px;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-40);">SkillBridge AI — System Architecture Overview</span>
+      </div>
+
+      <!-- Client Layer -->
+      <div class="arch-layer">
+        <div class="arch-label">Client Layer</div>
+        <div class="arch-boxes">
+          <div class="arch-box" style="background:var(--green-light);color:var(--green);border:1px solid var(--green-mid);">Next.js 14 Web App</div>
+          <div class="arch-box" style="background:var(--green-light);color:var(--green);border:1px solid var(--green-mid);">React Native Mobile</div>
+          <div class="arch-box" style="background:var(--green-light);color:var(--green);border:1px solid var(--green-mid);">Institution Admin Portal</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ REST API + WebSocket</div>
+
+      <!-- API Gateway -->
+      <div class="arch-layer">
+        <div class="arch-label">API Gateway</div>
+        <div class="arch-boxes">
+          <div class="arch-box" style="background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid);flex:2;">Nginx → FastAPI Gateway (Rate Limiting · Auth · Load Balancing)</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Internal Service Calls</div>
+
+      <!-- Microservices -->
+      <div class="arch-layer">
+        <div class="arch-label">Microservices</div>
+        <div class="arch-boxes">
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Auth Service<br><span style="color:var(--ink-40);font-weight:400;">FastAPI + JWT</span></div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Profile Service<br><span style="color:var(--ink-40);font-weight:400;">FastAPI</span></div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Gap Engine<br><span style="color:var(--ink-40);font-weight:400;">Python + ML</span></div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Roadmap AI<br><span style="color:var(--ink-40);font-weight:400;">GPT-4o</span></div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Market Intel<br><span style="color:var(--ink-40);font-weight:400;">Scrapy + NLP</span></div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Message Queue (Redis Streams)</div>
+
+      <!-- AI/ML Layer -->
+      <div class="arch-layer">
+        <div class="arch-label">AI / ML Layer</div>
+        <div class="arch-boxes">
+          <div class="arch-box" style="background:var(--violet-light);color:var(--violet);border:1px solid #C9BBEE;font-size:11px;">Skill Extractor<br>spaCy + BERT</div>
+          <div class="arch-box" style="background:var(--violet-light);color:var(--violet);border:1px solid #C9BBEE;font-size:11px;">Gap Analyzer<br>Cosine Sim + Graph</div>
+          <div class="arch-box" style="background:var(--violet-light);color:var(--violet);border:1px solid #C9BBEE;font-size:11px;">Forecasting<br>LSTM + XGBoost</div>
+          <div class="arch-box" style="background:var(--violet-light);color:var(--violet);border:1px solid #C9BBEE;font-size:11px;">LLM Orchestration<br>LangChain</div>
+          <div class="arch-box" style="background:var(--violet-light);color:var(--violet);border:1px solid #C9BBEE;font-size:11px;">Embeddings<br>Pinecone Vector DB</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ Read / Write</div>
+
+      <!-- Data Layer -->
+      <div class="arch-layer">
+        <div class="arch-label">Data Layer</div>
+        <div class="arch-boxes">
+          <div class="arch-box" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-mid);font-size:11px;">PostgreSQL<br>Primary DB</div>
+          <div class="arch-box" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-mid);font-size:11px;">Redis<br>Cache + Sessions</div>
+          <div class="arch-box" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-mid);font-size:11px;">Pinecone<br>Vector Store</div>
+          <div class="arch-box" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-mid);font-size:11px;">S3<br>File Storage</div>
+          <div class="arch-box" style="background:var(--amber-light);color:var(--amber);border:1px solid var(--amber-mid);font-size:11px;">Elasticsearch<br>Job Data Search</div>
+        </div>
+      </div>
+      <div class="arch-arrow">↓ External APIs</div>
+
+      <!-- External -->
+      <div class="arch-layer">
+        <div class="arch-label">External Sources</div>
+        <div class="arch-boxes">
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">LinkedIn API</div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">GitHub API</div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Coursera / Udemy</div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">OpenAI API</div>
+          <div class="arch-box" style="background:var(--surface-2);border:1px solid var(--border);color:var(--ink-70);font-size:11px;">Job Boards</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TECH STACK -->
+  <section id="techstack">
+    <div class="section-head">
+      <div class="sec-num">07</div>
+      <div>
+        <h2>Technology Stack</h2>
+        <p>Latest frameworks — production-ready choices</p>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="card">
+        <div class="card-h">🖥️ Frontend</div>
+        <div class="stack-row">
+          <span class="stack-pill"><span class="dot" style="background:#000;"></span>Next.js 14 (App Router)</span>
+          <span class="stack-pill"><span class="dot" style="background:#61DAFB;"></span>React 18</span>
+          <span class="stack-pill"><span class="dot" style="background:#3178C6;"></span>TypeScript 5</span>
+          <span class="stack-pill"><span class="dot" style="background:#06B6D4;"></span>TailwindCSS 3.4</span>
+          <span class="stack-pill"><span class="dot" style="background:#E97316;"></span>shadcn/ui</span>
+          <span class="stack-pill"><span class="dot" style="background:#6366F1;"></span>Framer Motion 11</span>
+          <span class="stack-pill"><span class="dot" style="background:#F5A623;"></span>Recharts 2</span>
+          <span class="stack-pill"><span class="dot" style="background:#FF6384;"></span>React Flow (roadmap viz)</span>
+          <span class="stack-pill"><span class="dot" style="background:#4A90E2;"></span>Zustand 4 (state)</span>
+          <span class="stack-pill"><span class="dot" style="background:#FF4154;"></span>React Query (TanStack)</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">⚙️ Backend</div>
+        <div class="stack-row">
+          <span class="stack-pill"><span class="dot" style="background:#009688;"></span>FastAPI 0.111</span>
+          <span class="stack-pill"><span class="dot" style="background:#3776AB;"></span>Python 3.12</span>
+          <span class="stack-pill"><span class="dot" style="background:#E10098;"></span>GraphQL (Strawberry)</span>
+          <span class="stack-pill"><span class="dot" style="background:#47A248;"></span>Node.js 20 LTS</span>
+          <span class="stack-pill"><span class="dot" style="background:#000000;"></span>Prisma ORM</span>
+          <span class="stack-pill"><span class="dot" style="background:#FF6C37;"></span>Celery + Beat</span>
+          <span class="stack-pill"><span class="dot" style="background:#DC382D;"></span>Redis 7</span>
+          <span class="stack-pill"><span class="dot" style="background:#336791;"></span>PostgreSQL 16</span>
+          <span class="stack-pill"><span class="dot" style="background:#005571;"></span>Elasticsearch 8</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">🤖 AI / ML</div>
+        <div class="stack-row">
+          <span class="stack-pill"><span class="dot" style="background:#412991;"></span>OpenAI GPT-4o</span>
+          <span class="stack-pill"><span class="dot" style="background:#FF8C00;"></span>LangChain 0.2</span>
+          <span class="stack-pill"><span class="dot" style="background:#000;"></span>Anthropic Claude API</span>
+          <span class="stack-pill"><span class="dot" style="background:#FF6F00;"></span>scikit-learn 1.4</span>
+          <span class="stack-pill"><span class="dot" style="background:#EE4C2C;"></span>PyTorch 2.3</span>
+          <span class="stack-pill"><span class="dot" style="background:#76B900;"></span>spaCy 3.7</span>
+          <span class="stack-pill"><span class="dot" style="background:#FFD700;"></span>XGBoost 2.0</span>
+          <span class="stack-pill"><span class="dot" style="background:#4285F4;"></span>Pinecone (vector DB)</span>
+          <span class="stack-pill"><span class="dot" style="background:#F7931E;"></span>Hugging Face Transformers</span>
+          <span class="stack-pill"><span class="dot" style="background:#5A67D8;"></span>sentence-transformers</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">☁️ Infrastructure & DevOps</div>
+        <div class="stack-row">
+          <span class="stack-pill"><span class="dot" style="background:#FF9900;"></span>AWS (ECS Fargate)</span>
+          <span class="stack-pill"><span class="dot" style="background:#326CE5;"></span>Kubernetes</span>
+          <span class="stack-pill"><span class="dot" style="background:#2496ED;"></span>Docker Compose</span>
+          <span class="stack-pill"><span class="dot" style="background:#FC6D26;"></span>GitLab CI/CD</span>
+          <span class="stack-pill"><span class="dot" style="background:#7B42BC;"></span>Terraform (IaC)</span>
+          <span class="stack-pill"><span class="dot" style="background:#E6522C;"></span>Prometheus + Grafana</span>
+          <span class="stack-pill"><span class="dot" style="background:#005EB8;"></span>Datadog APM</span>
+          <span class="stack-pill"><span class="dot" style="background:#FF6C37;"></span>Sentry (error tracking)</span>
+          <span class="stack-pill"><span class="dot" style="background:#343434;"></span>Vercel (frontend CDN)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. API DESIGN -->
+  <section id="apis">
+    <div class="section-head">
+      <div class="sec-num">08</div>
+      <div>
+        <h2>REST API Design</h2>
+        <p>Core endpoints — versioned, typed, and authenticated</p>
+      </div>
+    </div>
+
+    <div class="callout callout-blue">
+      <span class="callout-icon">🔐</span>
+      <p>All endpoints require <strong>Bearer JWT token</strong> in Authorization header. Rate limits: 100 req/min per user, 1000 req/min per institution. Base URL: <code style="font-family:'JetBrains Mono',monospace;font-size:12px;background:rgba(46,95,163,0.1);padding:2px 6px;border-radius:4px;">https://api.skillbridge.ai/v1</code></p>
+    </div>
+
+    <div class="api-card">
+      <div class="api-header">
+        <span class="api-method post">POST</span>
+        <span class="api-path">/profile/analyze</span>
+        <span class="api-desc">Analyze resume + build skill vector</span>
+      </div>
+      <div class="api-body">
+        <pre><span class="json-key">// Request Body</span>
+{
+  <span class="json-key">"resume_text"</span>: <span class="json-str">"Software engineer with 2 years experience..."</span>,
+  <span class="json-key">"github_username"</span>: <span class="json-str">"priya-dev"</span>,
+  <span class="json-key">"target_role"</span>: <span class="json-str">"Machine Learning Engineer"</span>,
+  <span class="json-key">"target_sector"</span>: <span class="json-str">"FinTech"</span>,
+  <span class="json-key">"location"</span>: <span class="json-str">"Bangalore, India"</span>
+}
+
+<span class="json-key">// Response 200</span>
+{
+  <span class="json-key">"profile_id"</span>: <span class="json-str">"prof_8fk2a9c"</span>,
+  <span class="json-key">"skill_vector"</span>: {
+    <span class="json-key">"python"</span>: <span class="json-num">0.82</span>,
+    <span class="json-key">"machine_learning"</span>: <span class="json-num">0.61</span>,
+    <span class="json-key">"sql"</span>: <span class="json-num">0.55</span>,
+    <span class="json-key">"mlops"</span>: <span class="json-num">0.18</span>,
+    <span class="json-key">"deep_learning"</span>: <span class="json-num">0.29</span>
+  },
+  <span class="json-key">"confidence_score"</span>: <span class="json-num">0.87</span>,
+  <span class="json-key">"detected_skills_count"</span>: <span class="json-num">34</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-card">
+      <div class="api-header">
+        <span class="api-method get">GET</span>
+        <span class="api-path">/gap-analysis/{profile_id}?role=ML+Engineer&sector=FinTech</span>
+        <span class="api-desc">Get ranked skill gaps</span>
+      </div>
+      <div class="api-body">
+        <pre><span class="json-key">// Response 200</span>
+{
+  <span class="json-key">"employability_score"</span>: <span class="json-num">642</span>,
+  <span class="json-key">"role_fit_percent"</span>: <span class="json-num">64.2</span>,
+  <span class="json-key">"skill_gaps"</span>: [
+    {
+      <span class="json-key">"skill"</span>: <span class="json-str">"MLOps / Kubernetes"</span>,
+      <span class="json-key">"criticality"</span>: <span class="json-str">"HIGH"</span>,
+      <span class="json-key">"market_demand_index"</span>: <span class="json-num">0.91</span>,
+      <span class="json-key">"trend"</span>: <span class="json-str">"RISING"</span>,
+      <span class="json-key">"estimated_hours_to_close"</span>: <span class="json-num">80</span>,
+      <span class="json-key">"salary_premium_usd"</span>: <span class="json-num">12000</span>
+    },
+    {
+      <span class="json-key">"skill"</span>: <span class="json-str">"LLM Fine-tuning"</span>,
+      <span class="json-key">"criticality"</span>: <span class="json-str">"HIGH"</span>,
+      <span class="json-key">"market_demand_index"</span>: <span class="json-num">0.88</span>,
+      <span class="json-key">"trend"</span>: <span class="json-str">"SURGING"</span>,
+      <span class="json-key">"estimated_hours_to_close"</span>: <span class="json-num">120</span>,
+      <span class="json-key">"salary_premium_usd"</span>: <span class="json-num">18000</span>
+    }
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-card">
+      <div class="api-header">
+        <span class="api-method post">POST</span>
+        <span class="api-path">/roadmap/generate</span>
+        <span class="api-desc">Generate AI learning roadmap</span>
+      </div>
+      <div class="api-body">
+        <pre><span class="json-key">// Request</span>
+{
+  <span class="json-key">"profile_id"</span>: <span class="json-str">"prof_8fk2a9c"</span>,
+  <span class="json-key">"target_date_weeks"</span>: <span class="json-num">16</span>,
+  <span class="json-key">"hours_per_week"</span>: <span class="json-num">10</span>,
+  <span class="json-key">"learning_style"</span>: <span class="json-str">"project-based"</span>,
+  <span class="json-key">"budget"</span>: <span class="json-str">"mixed"</span>
+}
+
+<span class="json-key">// Response</span>
+{
+  <span class="json-key">"roadmap_id"</span>: <span class="json-str">"rm_f7a2b1"</span>,
+  <span class="json-key">"weeks"</span>: [
+    {
+      <span class="json-key">"week"</span>: <span class="json-num">1</span>,
+      <span class="json-key">"focus"</span>: <span class="json-str">"Docker & Container Fundamentals"</span>,
+      <span class="json-key">"resources"</span>: [
+        { <span class="json-key">"title"</span>: <span class="json-str">"Docker Official Docs"</span>, <span class="json-key">"type"</span>: <span class="json-str">"FREE"</span>, <span class="json-key">"hours"</span>: <span class="json-num">4</span> },
+        { <span class="json-key">"title"</span>: <span class="json-str">"Containers 101 — Coursera"</span>, <span class="json-key">"type"</span>: <span class="json-str">"FREE"</span>, <span class="json-key">"hours"</span>: <span class="json-num">6</span> }
+      ],
+      <span class="json-key">"project"</span>: <span class="json-str">"Dockerize your existing ML model"</span>,
+      <span class="json-key">"milestone"</span>: <span class="json-str">"Deploy container to local Kubernetes cluster"</span>
+    }
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-card">
+      <div class="api-header">
+        <span class="api-method get">GET</span>
+        <span class="api-path">/market/trends?role=ML+Engineer&sector=FinTech&location=Bangalore</span>
+        <span class="api-desc">Real-time job market intelligence</span>
+      </div>
+      <div class="api-body">
+        <pre><span class="json-key">// Response</span>
+{
+  <span class="json-key">"last_updated"</span>: <span class="json-str">"2025-02-28T06:00:00Z"</span>,
+  <span class="json-key">"job_postings_analyzed"</span>: <span class="json-num">12847</span>,
+  <span class="json-key">"top_skills"</span>: [
+    { <span class="json-key">"skill"</span>: <span class="json-str">"PyTorch"</span>,    <span class="json-key">"demand_pct"</span>: <span class="json-num">78</span>, <span class="json-key">"trend"</span>: <span class="json-str">"STABLE"</span>  },
+    { <span class="json-key">"skill"</span>: <span class="json-str">"LangChain"</span>,   <span class="json-key">"demand_pct"</span>: <span class="json-num">64</span>, <span class="json-key">"trend"</span>: <span class="json-str">"SURGING"</span> },
+    { <span class="json-key">"skill"</span>: <span class="json-str">"MLflow"</span>,     <span class="json-key">"demand_pct"</span>: <span class="json-num">51</span>, <span class="json-key">"trend"</span>: <span class="json-str">"RISING"</span>  },
+    { <span class="json-key">"skill"</span>: <span class="json-str">"Apache Spark"</span>, <span class="json-key">"demand_pct"</span>: <span class="json-num">38</span>, <span class="json-key">"trend"</span>: <span class="json-str">"FALLING"</span> }
+  ]
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9. DATABASE SCHEMA -->
+  <section id="database">
+    <div class="section-head">
+      <div class="sec-num">09</div>
+      <div>
+        <h2>Database Schema</h2>
+        <p>PostgreSQL primary tables — Prisma ORM</p>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">📋 users</div>
+        <table class="schema-table">
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+          <tr><td class="pk">id</td><td><span class="type-tag">UUID</span></td><td>Primary Key</td></tr>
+          <tr><td>email</td><td><span class="type-tag">TEXT</span></td><td>Unique, indexed</td></tr>
+          <tr><td>full_name</td><td><span class="type-tag">TEXT</span></td><td></td></tr>
+          <tr><td>role</td><td><span class="type-tag">ENUM</span></td><td>student | admin | institution</td></tr>
+          <tr><td>institution_id</td><td><span class="type-tag">UUID</span></td><td class="fk">FK → institutions</td></tr>
+          <tr><td>created_at</td><td><span class="type-tag">TIMESTAMP</span></td><td>Auto</td></tr>
+          <tr><td>onboarding_complete</td><td><span class="type-tag">BOOL</span></td><td>Default false</td></tr>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">🧠 skill_profiles</div>
+        <table class="schema-table">
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+          <tr><td class="pk">id</td><td><span class="type-tag">UUID</span></td><td>Primary Key</td></tr>
+          <tr><td class="fk">user_id</td><td><span class="type-tag">UUID</span></td><td>FK → users</td></tr>
+          <tr><td>skill_vector</td><td><span class="type-tag">JSONB</span></td><td>Skill → confidence score map</td></tr>
+          <tr><td>raw_resume_text</td><td><span class="type-tag">TEXT</span></td><td>Encrypted at rest</td></tr>
+          <tr><td>github_repos_analyzed</td><td><span class="type-tag">JSONB</span></td><td>Array of repo metadata</td></tr>
+          <tr><td>employability_score</td><td><span class="type-tag">INT</span></td><td>0–1000</td></tr>
+          <tr><td>last_refreshed</td><td><span class="type-tag">TIMESTAMP</span></td><td>Auto updated</td></tr>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">📊 skill_gaps</div>
+        <table class="schema-table">
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+          <tr><td class="pk">id</td><td><span class="type-tag">UUID</span></td><td>Primary Key</td></tr>
+          <tr><td class="fk">profile_id</td><td><span class="type-tag">UUID</span></td><td>FK → skill_profiles</td></tr>
+          <tr><td>skill_name</td><td><span class="type-tag">TEXT</span></td><td>Indexed</td></tr>
+          <tr><td>criticality</td><td><span class="type-tag">ENUM</span></td><td>HIGH | MEDIUM | LOW</td></tr>
+          <tr><td>market_demand_index</td><td><span class="type-tag">FLOAT</span></td><td>0.0–1.0</td></tr>
+          <tr><td>trend_direction</td><td><span class="type-tag">ENUM</span></td><td>SURGING | RISING | STABLE | FALLING</td></tr>
+          <tr><td>salary_premium_usd</td><td><span class="type-tag">INT</span></td><td>Annual salary uplift</td></tr>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">🗺️ roadmaps</div>
+        <table class="schema-table">
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+          <tr><td class="pk">id</td><td><span class="type-tag">UUID</span></td><td>Primary Key</td></tr>
+          <tr><td class="fk">user_id</td><td><span class="type-tag">UUID</span></td><td>FK → users</td></tr>
+          <tr><td>target_role</td><td><span class="type-tag">TEXT</span></td><td></td></tr>
+          <tr><td>target_date</td><td><span class="type-tag">DATE</span></td><td></td></tr>
+          <tr><td>weeks_data</td><td><span class="type-tag">JSONB</span></td><td>Full week-by-week plan</td></tr>
+          <tr><td>completion_percent</td><td><span class="type-tag">FLOAT</span></td><td>Updated on progress</td></tr>
+          <tr><td>generated_at</td><td><span class="type-tag">TIMESTAMP</span></td><td></td></tr>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">📈 job_market_data</div>
+        <table class="schema-table">
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+          <tr><td class="pk">id</td><td><span class="type-tag">UUID</span></td><td>Primary Key</td></tr>
+          <tr><td>role</td><td><span class="type-tag">TEXT</span></td><td>Indexed</td></tr>
+          <tr><td>sector</td><td><span class="type-tag">TEXT</span></td><td></td></tr>
+          <tr><td>location</td><td><span class="type-tag">TEXT</span></td><td></td></tr>
+          <tr><td>skill_demand_map</td><td><span class="type-tag">JSONB</span></td><td>Skill → occurrence %, trend</td></tr>
+          <tr><td>job_count</td><td><span class="type-tag">INT</span></td><td>Postings analyzed</td></tr>
+          <tr><td>snapshot_date</td><td><span class="type-tag">DATE</span></td><td>Weekly snapshots kept</td></tr>
+        </table>
+      </div>
+
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">🏛️ institutions</div>
+        <table class="schema-table">
+          <tr><th>Column</th><th>Type</th><th>Notes</th></tr>
+          <tr><td class="pk">id</td><td><span class="type-tag">UUID</span></td><td>Primary Key</td></tr>
+          <tr><td>name</td><td><span class="type-tag">TEXT</span></td><td></td></tr>
+          <tr><td>admin_user_id</td><td><span class="type-tag">UUID</span></td><td>FK → users</td></tr>
+          <tr><td>plan</td><td><span class="type-tag">ENUM</span></td><td>free | pro | enterprise</td></tr>
+          <tr><td>student_count</td><td><span class="type-tag">INT</span></td><td>Cached count</td></tr>
+          <tr><td>target_companies</td><td><span class="type-tag">JSONB</span></td><td>Company list for benchmarking</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. AI/ML PIPELINE -->
+  <section id="ai">
+    <div class="section-head">
+      <div class="sec-num">10</div>
+      <div>
+        <h2>AI / ML Pipeline</h2>
+        <p>How the intelligence layer works end-to-end</p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="card" style="border-left: 4px solid var(--green);">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📥</div>
+          <div>
+            <div class="card-h" style="margin-bottom:6px;">Stage 1: Data Ingestion Pipeline (Scrapy + Playwright)</div>
+            <div class="card-p">Async web crawlers run daily across LinkedIn, Indeed, Naukri, Glassdoor, AngelList, and Wellfound. Each posting is parsed with custom NLP to extract: job title, required skills (hard + soft), experience level, salary range, company name, sector. Raw data hits Elasticsearch for full-text search, then skill occurrence frequencies are computed and stored in PostgreSQL as weekly snapshots. 15,000+ job postings processed per daily run. Anti-scraping handled via rotating residential proxies (Bright Data) and headless browser fingerprint randomization.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--blue);">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--blue-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔍</div>
+          <div>
+            <div class="card-h" style="margin-bottom:6px;">Stage 2: Skill Extraction (BERT + spaCy NLP)</div>
+            <div class="card-p">Resume and job description text is passed through a fine-tuned BERT NER model (trained on 50K labeled resumes) to identify skill entities. Skills are then mapped to a canonical ontology of 1,200+ normalized skill nodes (e.g., "React.js", "ReactJS", and "React" all map to "react") using a custom knowledge graph. Each extracted skill is assigned a confidence score via cosine similarity of contextual embeddings (sentence-transformers/all-mpnet-base-v2). GitHub repos are analyzed for language usage, library imports, and README keywords to infer practical proficiency beyond self-reported skills.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--violet);">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--violet-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📐</div>
+          <div>
+            <div class="card-h" style="margin-bottom:6px;">Stage 3: Gap Analysis (Cosine Similarity + Graph Distance)</div>
+            <div class="card-p">The student's normalized skill vector is compared against the aggregate skill requirement vector for the target role using cosine similarity in a 768-dimensional embedding space. Additionally, a prerequisite skill graph (built with NetworkX) computes graph distance between current skills and target skills to recommend optimal learning sequencing. Each gap is weighted by: (market demand index × 0.4) + (criticality × 0.35) + (salary premium × 0.25). Result is a ranked list of gaps with actionable priority scores, estimated learning hours (from historical completion data), and time-to-close projections.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--amber);">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--amber-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🗺️</div>
+          <div>
+            <div class="card-h" style="margin-bottom:6px;">Stage 4: Roadmap Generation (GPT-4o + LangChain)</div>
+            <div class="card-p">LangChain orchestrates a multi-step GPT-4o prompt chain: (1) Receive skill gap report + user constraints. (2) Query vector DB (Pinecone) for best learning resources per skill. (3) Apply topological sort on prerequisite graph for optimal sequencing. (4) Generate week-by-week plan with resources, hands-on projects, and verifiable milestones. (5) Self-critique loop: LLM validates the roadmap against time constraints and adjusts if overloaded. Final roadmap is stored in PostgreSQL and rendered as an interactive React Flow graph in the UI. Roadmaps auto-refresh monthly as market trends shift.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="border-left: 4px solid var(--rose);">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+          <div style="width:48px;height:48px;border-radius:12px;background:var(--rose-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🔮</div>
+          <div>
+            <div class="card-h" style="margin-bottom:6px;">Stage 5: Future Forecasting (LSTM + XGBoost Ensemble)</div>
+            <div class="card-p">Historical skill demand time-series (weekly snapshots from last 2 years) is fed into a multi-variate LSTM model to forecast demand trajectories for each skill. XGBoost adds feature-engineered signals: GitHub star growth velocity, Stack Overflow question volume, arXiv paper citations, and tech subreddit mention frequency. Ensemble predictions (LSTM 60%, XGBoost 40%) produce 6, 12, 24-month demand forecasts with confidence intervals. Skills predicted to surge in the next 6 months are flagged in the roadmap with a "Future-Proof" badge, giving learners a competitive head start on emerging technologies.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11. SPRINT PLAN -->
+  <section id="sprints">
+    <div class="section-head">
+      <div class="sec-num">11</div>
+      <div>
+        <h2>12-Week Sprint Plan</h2>
+        <p>From zero to production-ready MVP</p>
+      </div>
+    </div>
+
+    <!-- Milestone Track -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px 28px;margin-bottom:24px;box-shadow:var(--shadow-xs);">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-40);margin-bottom:24px;">Project Milestones</div>
+      <div class="milestone-row">
+        <div class="milestone ms-active">
+          <div class="ms-dot">🏗️</div>
+          <div class="ms-label">Foundation</div>
+          <div class="ms-week">Wk 1–2</div>
+        </div>
+        <div class="milestone ms-active">
+          <div class="ms-dot">🧠</div>
+          <div class="ms-label">AI Pipeline</div>
+          <div class="ms-week">Wk 3–4</div>
+        </div>
+        <div class="milestone ms-active">
+          <div class="ms-dot">🖥️</div>
+          <div class="ms-label">Core UI</div>
+          <div class="ms-week">Wk 5–6</div>
+        </div>
+        <div class="milestone ms-active">
+          <div class="ms-dot">📊</div>
+          <div class="ms-label">Analytics</div>
+          <div class="ms-week">Wk 7–8</div>
+        </div>
+        <div class="milestone">
+          <div class="ms-dot">✨</div>
+          <div class="ms-label">Bonus Features</div>
+          <div class="ms-week">Wk 9–10</div>
+        </div>
+        <div class="milestone">
+          <div class="ms-dot">🚀</div>
+          <div class="ms-label">Launch Prep</div>
+          <div class="ms-week">Wk 11–12</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="sprint-table">
+        <thead>
+          <tr>
+            <th>Sprint</th>
+            <th>Focus</th>
+            <th>Key Deliverables</th>
+            <th>Acceptance Criteria</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="sprint-num">S1</span><div style="font-size:11px;color:var(--ink-40);margin-top:4px;">Wk 1–2</div></td>
+            <td><strong>Foundation & Infrastructure</strong></td>
+            <td>
+              <div style="font-size:12.5px;line-height:1.8;">
+                • Monorepo setup (Turborepo)<br>
+                • PostgreSQL + Redis + Docker Compose<br>
+                • FastAPI skeleton + JWT auth<br>
+                • Next.js 14 app router scaffold<br>
+                • CI/CD pipeline (GitLab)
+              </div>
+            </td>
+            <td><div style="font-size:12.5px;color:var(--green);">User can sign up, log in, and reach an empty dashboard. All services running in Docker.</div></td>
+          </tr>
+          <tr>
+            <td><span class="sprint-num">S2</span><div style="font-size:11px;color:var(--ink-40);margin-top:4px;">Wk 3–4</div></td>
+            <td><strong>AI Skill Engine</strong></td>
+            <td>
+              <div style="font-size:12.5px;line-height:1.8;">
+                • Resume parser (NLP + BERT)<br>
+                • GitHub repo skill analyzer<br>
+                • Skill ontology graph (1200+ nodes)<br>
+                • Skill vector normalization API<br>
+                • Profile Builder UI
+              </div>
+            </td>
+            <td><div style="font-size:12.5px;color:var(--green);">Upload resume → receive skill vector with ≥85% accuracy vs manual tagging. GitHub sync extracts at least 80% of repo skills correctly.</div></td>
+          </tr>
+          <tr>
+            <td><span class="sprint-num">S3</span><div style="font-size:11px;color:var(--ink-40);margin-top:4px;">Wk 5–6</div></td>
+            <td><strong>Job Market Intelligence</strong></td>
+            <td>
+              <div style="font-size:12.5px;line-height:1.8;">
+                • Scrapy spiders for 5 job boards<br>
+                • NLP skill extraction pipeline<br>
+                • Celery Beat scheduling (daily runs)<br>
+                • Elasticsearch job index<br>
+                • Market trends API endpoints
+              </div>
+            </td>
+            <td><div style="font-size:12.5px;color:var(--green);">10,000+ job postings indexed. Market trend API returns accurate skill demand data within 500ms. Daily scrape runs without failures.</div></td>
+          </tr>
+          <tr>
+            <td><span class="sprint-num">S4</span><div style="font-size:11px;color:var(--ink-40);margin-top:4px;">Wk 7–8</div></td>
+            <td><strong>Gap Engine + Roadmap AI</strong></td>
+            <td>
+              <div style="font-size:12.5px;line-height:1.8;">
+                • Cosine similarity gap analyzer<br>
+                • Prerequisite knowledge graph<br>
+                • GPT-4o roadmap generation<br>
+                • LangChain orchestration layer<br>
+                • Pinecone resource vector store
+              </div>
+            </td>
+            <td><div style="font-size:12.5px;color:var(--green);">Full gap report generated in under 8s. Roadmap covers all HIGH criticality gaps. Resources are real, accessible links with accurate metadata.</div></td>
+          </tr>
+          <tr>
+            <td><span class="sprint-num">S5</span><div style="font-size:11px;color:var(--ink-40);margin-top:4px;">Wk 9–10</div></td>
+            <td><strong>Dashboard & Institution Portal</strong></td>
+            <td>
+              <div style="font-size:12.5px;line-height:1.8;">
+                • Employability Score dashboard<br>
+                • Interactive React Flow roadmap<br>
+                • Institution admin portal<br>
+                • Cohort skill heatmap (D3.js)<br>
+                • Progress tracking + milestone UI
+              </div>
+            </td>
+            <td><div style="font-size:12.5px;color:var(--green);">Students can view and interact with full roadmap. Admins see real-time cohort analytics. All charts render under 1.5s.</div></td>
+          </tr>
+          <tr>
+            <td><span class="sprint-num">S6</span><div style="font-size:11px;color:var(--ink-40);margin-top:4px;">Wk 11–12</div></td>
+            <td><strong>Bonus Features + Launch</strong></td>
+            <td>
+              <div style="font-size:12.5px;line-height:1.8;">
+                • AI Career Coach chatbot<br>
+                • Job Match Simulator<br>
+                • LSTM forecasting model<br>
+                • Performance optimization<br>
+                • Production AWS deploy, monitoring
+              </div>
+            </td>
+            <td><div style="font-size:12.5px;color:var(--green);">All core + bonus features working. Lighthouse score ≥90. p95 API latency <300ms. Zero critical bugs. Full Datadog monitoring active.</div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 12. SUCCESS METRICS -->
+  <section id="metrics">
+    <div class="section-head">
+      <div class="sec-num">12</div>
+      <div>
+        <h2>Success Metrics & KPIs</h2>
+        <p>How we measure impact — quantifiably</p>
+      </div>
+    </div>
+
+    <div class="g2">
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">📊 Product Metrics</div>
+        <div class="metric-row">
+          <span class="metric-icon">🎯</span>
+          <div class="metric-info"><div class="metric-name">Gap Analysis Accuracy</div><div class="metric-desc">vs manually curated benchmark set</div></div>
+          <div class="metric-target">≥ 88%</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">⚡</span>
+          <div class="metric-info"><div class="metric-name">Roadmap Generation Time</div><div class="metric-desc">End-to-end, cold start</div></div>
+          <div class="metric-target">< 8s</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">🔁</span>
+          <div class="metric-info"><div class="metric-name">7-Day User Retention</div><div class="metric-desc">Users returning within first week</div></div>
+          <div class="metric-target">≥ 55%</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">📈</span>
+          <div class="metric-info"><div class="metric-name">Roadmap Completion Rate</div><div class="metric-desc">% users who finish ≥50% of roadmap</div></div>
+          <div class="metric-target">≥ 40%</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">🏆</span>
+          <div class="metric-info"><div class="metric-name">Employability Score Uplift</div><div class="metric-desc">Average improvement after 8 weeks of use</div></div>
+          <div class="metric-target">+180 pts</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div style="padding:14px 20px;border-bottom:1px solid var(--border);font-family:'Instrument Serif',serif;font-size:16px;color:var(--ink);background:var(--surface-2);">🚀 Business Metrics</div>
+        <div class="metric-row">
+          <span class="metric-icon">👤</span>
+          <div class="metric-info"><div class="metric-name">Active Users — 3 months</div><div class="metric-desc">Registered and active monthly users</div></div>
+          <div class="metric-target">10,000</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">🏛️</span>
+          <div class="metric-info"><div class="metric-name">Institutions Onboarded</div><div class="metric-desc">Colleges / companies using admin portal</div></div>
+          <div class="metric-target">50</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">😊</span>
+          <div class="metric-info"><div class="metric-name">NPS Score</div><div class="metric-desc">Net Promoter Score from user surveys</div></div>
+          <div class="metric-target">≥ 62</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">💼</span>
+          <div class="metric-info"><div class="metric-name">Placement Rate Improvement</div><div class="metric-desc">Institutions reporting better placement outcomes</div></div>
+          <div class="metric-target">+28%</div>
+        </div>
+        <div class="metric-row">
+          <span class="metric-icon">⚙️</span>
+          <div class="metric-info"><div class="metric-name">System Uptime</div><div class="metric-desc">Monthly SLA commitment</div></div>
+          <div class="metric-target">99.9%</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13. RISK REGISTER -->
+  <section id="risks">
+    <div class="section-head">
+      <div class="sec-num">13</div>
+      <div>
+        <h2>Risk Register</h2>
+        <p>Known risks and pre-planned mitigations</p>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <div class="risk-header">
+        <div>Risk</div>
+        <div>Likelihood</div>
+        <div>Impact</div>
+        <div>Mitigation</div>
+      </div>
+      <div class="risk-item">
+        <div><strong style="font-size:13px;">Job Board Anti-Scraping Blocks</strong><div style="font-size:12px;color:var(--ink-40);">Websites block scrapers, breaking data pipeline</div></div>
+        <div><span class="badge badge-high">High</span></div>
+        <div><span class="badge badge-high">High</span></div>
+        <div style="font-size:12.5px;color:var(--ink-70);">Use residential proxy rotation (Bright Data), respectful rate limits, fallback to official APIs (LinkedIn, Glassdoor) where available. Cache last-known-good data for 7 days.</div>
+      </div>
+      <div class="risk-item">
+        <div><strong style="font-size:13px;">LLM API Cost Overrun</strong><div style="font-size:12px;color:var(--ink-40);">GPT-4o costs spike unexpectedly at scale</div></div>
+        <div><span class="badge badge-med">Medium</span></div>
+        <div><span class="badge badge-high">High</span></div>
+        <div style="font-size:12.5px;color:var(--ink-70);">Per-user monthly token budget cap. Cache generated roadmaps (invalidate only when market shifts >15%). Evaluate open-source LLMs (Llama-3) for non-critical paths. Implement tiered pricing to recover costs.</div>
+      </div>
+      <div class="risk-item">
+        <div><strong style="font-size:13px;">Skill Extraction Inaccuracy</strong><div style="font-size:12px;color:var(--ink-40);">NLP model misidentifies or misses skills in resumes</div></div>
+        <div><span class="badge badge-med">Medium</span></div>
+        <div><span class="badge badge-high">High</span></div>
+        <div style="font-size:12.5px;color:var(--ink-70);">Allow manual skill corrections in UI. Confidence threshold filtering (only include skills with >0.65 confidence). Continuous model fine-tuning with user correction feedback loop. A/B test extraction models quarterly.</div>
+      </div>
+      <div class="risk-item">
+        <div><strong style="font-size:13px;">Data Privacy / GDPR Compliance</strong><div style="font-size:12px;color:var(--ink-40);">Resume and personal data handling liability</div></div>
+        <div><span class="badge badge-low">Low</span></div>
+        <div><span class="badge badge-high">High</span></div>
+        <div style="font-size:12.5px;color:var(--ink-70);">AES-256 encryption at rest for all PII. Right-to-delete API. Data processed in-region only (India: AWS Mumbai, EU: Frankfurt). Clear privacy policy. DPA agreements with all third-party services. SOC2 Type 2 on roadmap.</div>
+      </div>
+      <div class="risk-item">
+        <div><strong style="font-size:13px;">Market Data Staleness</strong><div style="font-size:12px;color:var(--ink-40);">Scraped data becomes outdated, misleading users</div></div>
+        <div><span class="badge badge-low">Low</span></div>
+        <div><span class="badge badge-med">Medium</span></div>
+        <div style="font-size:12.5px;color:var(--ink-70);">Daily scraping cadence for top roles. Timestamp all market data; surface data age prominently in UI. Automated alerts if scraping fails for >24hrs. Secondary fallback data source (Lightcast / Burning Glass API).</div>
+      </div>
+      <div class="risk-item" style="border-bottom:none;">
+        <div><strong style="font-size:13px;">Low User Engagement / Drop-off</strong><div style="font-size:12px;color:var(--ink-40);">Users generate roadmap but don't follow through</div></div>
+        <div><span class="badge badge-med">Medium</span></div>
+        <div><span class="badge badge-med">Medium</span></div>
+        <div style="font-size:12.5px;color:var(--ink-70);">Weekly check-in emails with progress nudges. Gamification (streaks, badges, leaderboard). AI coach sends personalized "what's next" reminders. Progress milestones trigger celebration animations. Social sharing of achievements.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14. MASTER PROMPT -->
+  <section id="prompt">
+    <div class="section-head">
+      <div class="sec-num">14</div>
+      <div>
+        <h2>Master Implementation Prompt</h2>
+        <p>The complete AI-assisted build prompt — copy, paste, ship</p>
+      </div>
+    </div>
+
+    <div class="callout callout-amber" style="margin-bottom:24px;">
+      <span class="callout-icon">⚡</span>
+      <p>Use this prompt with <strong>Claude Sonnet 4.5, GPT-4o, or Cursor AI</strong> to bootstrap the full SkillBridge AI codebase. It is structured in modular phases — run each section independently or together. Provide your environment variables as context before running.</p>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header">
+        <span style="font-size:22px;">🤖</span>
+        <span class="prompt-header-title">SkillBridge AI — Master Build Prompt</span>
+        <span class="prompt-header-badge">Production-Ready</span>
+      </div>
+      <div class="prompt-body">
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🏗️ Phase 1 — Project Scaffolding</div>
+          <div class="prompt-text">You are a senior full-stack architect building "SkillBridge AI" — a Skill-Gap-to-Job-Market Prediction Engine for EdTech.
+
+STACK:
+- Frontend: Next.js 14 (App Router), TypeScript 5, TailwindCSS 3.4, shadcn/ui, Framer Motion 11, React Query (TanStack), Zustand 4, React Flow (roadmap visualization), Recharts 2
+- Backend: FastAPI 0.111 (Python 3.12), Celery + Redis (async tasks), Prisma ORM, PostgreSQL 16, Elasticsearch 8
+- AI/ML: LangChain 0.2, OpenAI GPT-4o, spaCy 3.7, sentence-transformers, Pinecone vector DB, scikit-learn 1.4, XGBoost 2.0, PyTorch 2.3
+- Infra: Docker Compose (local), AWS ECS Fargate (prod), Redis 7, S3, Sentry, Datadog
+
+TASK: Scaffold the complete monorepo with:
+1. Turborepo monorepo structure: apps/web (Next.js), apps/api (FastAPI), apps/ml (Python ML service), packages/shared (types, constants)
+2. Docker Compose with all services: postgres, redis, elasticsearch, api, web, ml, celery-worker, celery-beat
+3. All environment variable templates (.env.example) for every service
+4. FastAPI app with: JWT auth middleware, CORS, rate limiting (slowapi), OpenAPI docs at /docs, health check endpoint
+5. Next.js 14 with: App router, authentication (NextAuth.js v5 with credential + Google provider), global layout with sidebar navigation, TailwindCSS + shadcn/ui configured
+6. PostgreSQL schema via Prisma: users, skill_profiles, skill_gaps, roadmaps, roadmap_progress, job_market_data, institutions, resources, challenges tables — include all foreign keys and indexes
+7. GitLab CI/CD pipeline (.gitlab-ci.yml): lint, type-check, test, docker build, deploy stages
+
+Output complete, runnable file contents for each file. No placeholders. All imports must be real library imports.</div>
+        </div>
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🧠 Phase 2 — AI Skill Extraction Engine</div>
+          <div class="prompt-text">Build the complete skill extraction and profile analysis system for SkillBridge AI.
+
+TASK 1 — Resume Parser Service (apps/ml/skill_extractor.py):
+- Load fine-tuned BERT NER model (use "dslim/bert-base-NER" from HuggingFace as base)
+- Parse resume text: extract skill entities, years of experience mentions, education level, job titles held
+- Map extracted skills to canonical ontology (provide 50 sample skill mappings as a dict)
+- Score each skill 0.0–1.0 using contextual embedding similarity (sentence-transformers/all-mpnet-base-v2)
+- Return structured JSON: {skill, confidence, category, years_experience_mentioned}
+- Handle edge cases: empty text, non-English resumes (detect with langdetect), very short resumes
+
+TASK 2 — GitHub Analyzer (apps/ml/github_analyzer.py):
+- Use PyGithub library to fetch user's public repos
+- Analyze each repo: primary language, libraries in requirements.txt/package.json/go.mod, README content
+- Score practical proficiency per skill based on: repo stars, commit frequency, code complexity (radon)
+- Return skill scores weighted by recency (last 6 months repos weighted 2×)
+- Merge with resume-extracted skills (take max confidence, note source as "resume" | "github" | "both")
+
+TASK 3 — FastAPI Endpoint (apps/api/routers/profile.py):
+- POST /v1/profile/analyze: accepts {resume_text, github_username, target_role, target_sector, location}
+- Calls ML service via httpx async, merges results, stores profile in PostgreSQL via Prisma
+- Returns full skill profile JSON as specified in API design
+- Background task: trigger gap analysis immediately after profile creation using Celery
+
+All code must be production-ready: type hints, error handling, logging (structlog), async where appropriate.</div>
+        </div>
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🔭 Phase 3 — Job Market Intelligence Pipeline</div>
+          <div class="prompt-text">Build the real-time job market data pipeline for SkillBridge AI.
+
+TASK 1 — Scrapy Spiders (apps/ml/scrapers/):
+Build async Scrapy spiders for:
+a) LinkedIn Jobs (uses Playwright for JS rendering): scrape title, company, description, skills_required, salary_range, location, posted_date
+b) Indeed Jobs: scrape same fields via HTML parsing
+c) Naukri.com: India-specific job board
+- All spiders: rotate User-Agent (ua-parser), handle pagination (up to 50 pages), respect robots.txt
+- Store raw HTML in S3 (boto3), parsed jobs in Elasticsearch index "job_postings"
+- Celery Beat schedule: run all spiders daily at 2:00 AM UTC
+
+TASK 2 — Skill Demand Calculator (apps/ml/market_analyzer.py):
+- For each role + sector + location combination:
+  - Count skill occurrence frequency across all job postings from last 30 days
+  - Compute demand_index = occurrences / total_postings for that role
+  - Compare current week vs previous week to determine trend: SURGING (>20% up), RISING (5–20% up), STABLE (±5%), FALLING (>5% down)
+  - Store weekly snapshots in PostgreSQL job_market_data table
+- Run weekly aggregation as Celery task every Sunday midnight
+
+TASK 3 — Market Trends FastAPI endpoints (apps/api/routers/market.py):
+- GET /v1/market/trends?role=&sector=&location= — cached in Redis for 1 hour
+- GET /v1/market/skills/trending?limit=20 — top surging skills globally
+- GET /v1/market/forecast/{skill} — 6/12/24 month demand prediction
+- All responses include last_updated timestamp and data freshness indicator
+
+Include complete Elasticsearch index mapping, Celery task definitions, and Redis caching decorator.</div>
+        </div>
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🗺️ Phase 4 — Gap Analysis & Roadmap Generation</div>
+          <div class="prompt-text">Build the core gap analysis engine and AI roadmap generator for SkillBridge AI.
+
+TASK 1 — Gap Analysis Engine (apps/ml/gap_analyzer.py):
+- Load student skill vector and target role skill requirements from PostgreSQL
+- Compute cosine similarity between student vector and role requirement vector in 768-dim embedding space
+- Build prerequisite skill graph using NetworkX (provide 30 real skill prerequisite edges, e.g., "deep_learning" requires ["python", "linear_algebra", "numpy"])
+- For each missing skill, calculate:
+  priority_score = (market_demand_index × 0.40) + (criticality_weight × 0.35) + (salary_premium_normalized × 0.25)
+- Estimate learning hours per skill based on: historical completion data averages, current student proficiency level, skill complexity rating
+- Return ranked list of gaps with all metadata including badge: HIGH/MEDIUM/LOW
+
+TASK 2 — LangChain Roadmap Orchestration (apps/ml/roadmap_generator.py):
+Build a multi-step LangChain chain using GPT-4o:
+
+Step 1 (Planning): Given skill gaps ranked list + user constraints (weekly_hours, target_date, learning_style, budget), generate learning sequence respecting prerequisite ordering via topological sort
+
+Step 2 (Resource Retrieval): For each skill in sequence, query Pinecone vector store to retrieve top 3 most relevant, quality-scored learning resources. Pinecone store pre-populated with metadata of 10,000+ Coursera, Udemy, YouTube, official docs resources.
+
+Step 3 (Week Planner): Generate week-by-week plan. Each week: focus_skill, resources (with URL, platform, cost, estimated_hours), hands_on_project (concrete, verifiable), milestone (measurable completion criterion)
+
+Step 4 (Self-Critique): LLM validates plan — checks total hours ≤ available hours, all HIGH gaps covered in first 60% of timeline, no week exceeds user's stated weekly_hours by more than 20%
+
+Step 5 (Finalize): Store roadmap JSON in PostgreSQL, create individual progress records in roadmap_progress table
+
+TASK 3 — Roadmap API (apps/api/routers/roadmap.py):
+- POST /v1/roadmap/generate — triggers async Celery task, returns task_id immediately
+- GET /v1/roadmap/status/{task_id} — SSE stream for real-time generation progress
+- GET /v1/roadmap/{roadmap_id} — fetch complete roadmap
+- PATCH /v1/roadmap/{roadmap_id}/progress — mark week/resource as complete
+- POST /v1/roadmap/{roadmap_id}/refresh — regenerate with updated market data
+
+Include full LangChain chain code with prompt templates, Pinecone upsert/query logic, and all error handling.</div>
+        </div>
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🖥️ Phase 5 — Frontend UI & Dashboard</div>
+          <div class="prompt-text">Build the complete Next.js 14 frontend for SkillBridge AI. Design aesthetic: clean, light, editorial with teal/sage greens as primary accent. Font: Instrument Serif (headings) + Syne (body). No dark mode needed for MVP.
+
+PAGES TO BUILD:
+
+1. /dashboard — Main student dashboard with:
+   - Employability Score widget (large animated number, Framer Motion counter animation on load)
+   - Quick stats: role fit %, gaps identified, roadmap week, days to target date
+   - Skill gap overview chart (horizontal bar chart, Recharts) showing top 5 gaps with demand index
+   - Market pulse widget: 3 trending skills for their target role with trend direction arrows
+   - Recent activity feed
+
+2. /profile — Skill Profile page:
+   - Skill radar chart (Recharts) showing current skills across categories
+   - Skill tile grid: each skill as a card showing name, confidence bar, source (resume/github/questionnaire)
+   - Add skills manually, edit confidence, import from GitHub button
+   - Target role & settings panel
+
+3. /gap-analysis — Detailed Gap Report:
+   - Filterable table of all skill gaps (HIGH/MED/LOW tabs)
+   - Each gap card: skill name, demand index sparkline (7-day), criticality badge, hours estimate, salary premium, trend arrow
+   - Sort by: priority, demand, salary impact, time to close
+   - "Start Learning This" CTA that anchors to the roadmap week covering this skill
+
+4. /roadmap — Interactive Learning Roadmap:
+   - React Flow graph showing skills as nodes, connections as prerequisite edges, color-coded by completion status
+   - Timeline view toggle: week-by-week card view showing resources, projects, milestones
+   - Progress bar per week, overall progress tracker
+   - Resource cards with platform icon, cost tag (FREE/PAID), hours estimate, external link
+   - Mark complete checkboxes, streak counter
+
+5. /market — Market Intelligence:
+   - Live skill demand heatmap (D3.js treemap) for selected role
+   - Trending skills leaderboard with 7-day trend sparklines
+   - Salary intelligence: skills vs salary premium bar chart
+   - Future skills forecast: 6/12/24 month projections with confidence bands (Recharts AreaChart)
+
+6. /coach — AI Career Coach:
+   - Chat interface (full-page, WhatsApp-style message bubbles)
+   - Streaming responses (useEventSource hook for SSE)
+   - Suggested prompts as pill buttons: "Why do I need MLOps?", "Am I on track?", "Review my resume bullet"
+   - File upload for resume review
+   - Context-aware: coach has full access to user's profile, gaps, and roadmap
+
+All pages: mobile-responsive, skeleton loaders for async data, Framer Motion page transitions, error boundary with friendly error state, empty states with illustration + CTA. Use React Query for all data fetching. Zustand for client-side state (selected role, UI preferences).</div>
+        </div>
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🤖 Phase 6 — AI Coach & Bonus Features</div>
+          <div class="prompt-text">Build the remaining AI-powered features for SkillBridge AI.
+
+TASK 1 — AI Career Coach Backend (apps/api/routers/coach.py):
+- POST /v1/coach/chat — streaming endpoint (Server-Sent Events)
+- System prompt: "You are an expert career coach for SkillBridge AI. You have full context of the user's skill profile, skill gaps, learning roadmap, target role, and market trends. You give specific, data-backed advice. Be encouraging but honest. Reference their actual skill scores and market data in your responses. You have access to tools: get_market_trend(skill), get_roadmap_status(), suggest_resources(skill)."
+- Inject user context from PostgreSQL into system prompt for every message
+- Implement LangChain ConversationBufferWindowMemory (last 20 messages) stored in Redis
+- Tool calling: coach can query market trends API, check roadmap progress, pull resource recommendations
+
+TASK 2 — Job Match Simulator (apps/api/routers/simulator.py + frontend /simulate page):
+- POST /v1/simulate/match — accept {job_description_text, profile_id}
+- Backend: extract skills from JD using NLP, compare against profile, score match 0-100%, identify specific gaps
+- Generate: "micro-roadmap" to close this specific job's gaps within user-specified weeks
+- Frontend: paste JD textarea → instant analysis (within 5s) → match score gauge, gap list, micro-roadmap cards
+
+TASK 3 — Skill Challenge Arena (apps/api/routers/challenges.py + frontend /challenges page):
+- Database: challenges table (id, skill, difficulty, type: coding|case|quiz, question_text, test_cases, points)
+- POST /v1/challenges/generate — GPT-4o generates a challenge for a given skill + difficulty
+- POST /v1/challenges/{id}/submit — evaluate coding submissions (Python: subprocess sandbox), quiz auto-grade, case study: LLM grade
+- On successful completion: update skill_profiles.skill_vector for that skill (+0.05 confidence, max 0.95)
+- Leaderboard: GET /v1/challenges/leaderboard?timeframe=weekly — rank by points
+- Frontend: challenge card with timer (Framer Motion countdown), code editor (CodeMirror 6), submit + results panel
+
+TASK 4 — LSTM Forecasting Model (apps/ml/forecaster.py):
+- Load weekly job_market_data snapshots from PostgreSQL (last 2 years of weekly data)
+- Feature engineering: skill demand %, GitHub stars weekly delta, Stack Overflow questions count (fetched via API)
+- PyTorch LSTM model: input = 52-week sequence per skill, output = next 4/8/12 month demand prediction
+- Train with train/val split, save model to S3, serve via FastAPI endpoint
+- Retrain monthly via Celery scheduled task
+- Return predictions with 80% confidence intervals
+
+TASK 5 — Institution Analytics Dashboard (frontend /admin page):
+- Cohort skill heatmap: D3.js color-coded grid (students × skills), hover shows individual score
+- Batch vs industry benchmark: grouped bar chart, each bar = skill, two bars = batch average vs industry requirement
+- Student progress table: sortable, filterable, shows employability score, completion %, predicted placement probability
+- Curriculum recommendation: AI suggests top 5 electives/workshops to address batch-level gaps
+- Export: PDF report generation (react-pdf) for placement officer with full analytics summary
+
+All features: complete backend + frontend, no placeholders, real working code.</div>
+        </div>
+
+        <div class="prompt-section">
+          <div class="prompt-section-title">🚀 Phase 7 — Production, Monitoring & Optimization</div>
+          <div class="prompt-text">Finalize SkillBridge AI for production deployment.
+
+TASK 1 — AWS Infrastructure (terraform/main.tf):
+- ECS Fargate tasks for: api, web, ml-service, celery-worker
+- RDS PostgreSQL 16 Multi-AZ (db.t3.medium) with automated backups
+- ElastiCache Redis 7 (cache.t3.micro)
+- Application Load Balancer with HTTPS termination, ACM cert
+- S3 buckets: raw-scrape-data, ml-models, user-resumes (server-side encrypted, versioned)
+- CloudFront CDN in front of S3 for static assets
+- VPC with public/private subnets, NAT gateway for private resources
+- ECS auto-scaling: target 70% CPU utilization, min 1 / max 10 tasks
+
+TASK 2 — Observability Stack:
+- Datadog APM: instrument FastAPI with ddtrace, trace all DB queries and external API calls
+- Sentry: configure in Next.js (app/layout.tsx) and FastAPI (middleware) for error capture
+- Prometheus metrics endpoint (/metrics) in FastAPI: custom metrics for: roadmaps_generated_total, gap_analysis_requests_total, scraping_jobs_processed_total, llm_tokens_used_total, api_latency_seconds histogram
+- Grafana dashboard JSON: 4 panels showing above metrics with 24h time range
+
+TASK 3 — Performance Optimization:
+- Redis caching strategy: market trends (1h TTL), gap analysis results (6h TTL, invalidate on profile update), roadmaps (7d TTL, invalidate on market shift >15%)
+- Next.js: ISR for market trends pages (revalidate: 3600), SSR for authenticated dashboard, static for landing page
+- Database: add composite indexes on (skill_gaps.profile_id, criticality), (job_market_data.role, sector, snapshot_date)
+- API response compression (GZip middleware), pagination for all list endpoints (cursor-based)
+- Image optimization: next/image for all images, WebP format, lazy loading
+
+TASK 4 — Testing Suite:
+- Backend: pytest + pytest-asyncio, 80%+ coverage, mock external APIs (OpenAI, GitHub, Pinecone) with responses library
+- Frontend: Vitest + React Testing Library, test all critical user flows (onboarding, gap view, roadmap interaction)
+- E2E: Playwright tests for: full onboarding flow, roadmap generation, chat interaction
+- ML: unit tests for skill extractor (test against 20 sample resumes with known correct outputs)
+
+Output complete Terraform HCL, docker-compose.prod.yml, pytest configuration, and key test files.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="callout callout-green" style="margin-top:24px;">
+      <span class="callout-icon">✅</span>
+      <p><strong>Usage Tip:</strong> Run each phase prompt sequentially in a new context window, providing the output of the previous phase as attached files or context. For best results with Cursor AI, open the relevant folder before each phase and use "Generate" mode. Each phase builds on the last — do not skip phases.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <div style="border-top:1px solid var(--border);padding-top:32px;margin-top:24px;display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink);">SkillBridge AI</div>
+      <div style="font-size:12px;color:var(--ink-40);">Implementation Plan v1.0 · EdTech Track 3 · February 2026</div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <span class="badge badge-blue">Next.js 14</span>
+      <span class="badge badge-low">FastAPI</span>
+      <span class="badge badge-med">GPT-4o</span>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Active nav highlighting on scroll
+const sections = document.querySelectorAll('section[id], div[id]');
+const navLinks = document.querySelectorAll('.nav-link');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + entry.target.id) {
+          link.classList.add('active');
+        }
+      });
+    }
+  });
+}, { threshold: 0.2, rootMargin: '-60px 0px -60% 0px' });
+
+sections.forEach(s => observer.observe(s));
+
+navLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    const target = document.querySelector(link.getAttribute('href'));
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      navLinks.forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    }
+  });
+});
+</script>
+</body>
+</html>
